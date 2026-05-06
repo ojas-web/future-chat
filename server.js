@@ -576,31 +576,19 @@ ${usersHtml}
 
 let openChats = {};
 
-function toggleChat(username){
+function toggleChat(username) {
 
-const panel =
-document.getElementById(
-'chat-' + username
-);
+const panel = document.getElementById('chat-' + username);
 
-if(panel.style.display==='none'){
+if (!panel) return;
 
-panel.style.display='block';
-
-openChats[username]=true;
-
-}else{
-
-panel.style.display='none';
-
-openChats[username]=false;
-
+if (panel.style.display === 'none' || panel.style.display === '') {
+    panel.style.display = 'block';
+} else {
+    panel.style.display = 'none';
 }
 
-saveState();
-
 }
-
 // ======================================
 // SAVE CHAT STATE
 // ======================================
