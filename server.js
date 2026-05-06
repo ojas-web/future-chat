@@ -780,33 +780,12 @@ t.value
 // CLEAR TEXT AFTER SEND
 // ======================================
 
-document.querySelectorAll('form')
-.forEach(form=>{
-
-form.addEventListener(
-'submit',
-()=>{
-
-const textarea =
-form.querySelector('textarea');
-
-if(textarea){
-
-const receiver =
-form.querySelector(
-'input[name="receiver"]'
-).value;
-
-sessionStorage.removeItem(
-'draft-' + receiver
-);
-
-textarea.value='';
-
-}
-
-}
-);
+document.querySelectorAll("textarea").forEach(t => {
+  t.addEventListener("input", () => {
+    const receiver = t.parentElement.querySelector("input[name='receiver']").value;
+    sessionStorage.setItem("draft-" + receiver, t.value);
+  });
+});
 
 });
 }
