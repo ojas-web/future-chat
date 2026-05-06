@@ -588,7 +588,7 @@ if (panel.style.display === 'none' || panel.style.display === '') {
     panel.style.display = 'none';
 }
 
-}
+
 // ======================================
 // SAVE CHAT STATE
 // ======================================
