@@ -14,9 +14,7 @@ const PORT = process.env.PORT || 3000;
 // ======================================
 // DATABASE (POSTGRES ONLY)
 // ======================================
-pool.connect()
-  .then(() => console.log("DB connected"))
-  .catch(err => console.log("DB ERROR:", err.message));
+
 
 
 const pool = new Pool({
@@ -27,6 +25,9 @@ const pool = new Pool({
   port: 5432
 });
 
+pool.connect()
+  .then(() => console.log("DB connected"))
+  .catch(err => console.log("DB ERROR:", err.message));
 // ======================================
 // MIDDLEWARE
 // ======================================
