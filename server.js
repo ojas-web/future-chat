@@ -3,11 +3,19 @@
 // ======================================
 
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+
 const bcrypt = require('bcrypt');
+const { Pool } = require('pg');
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'chatapp',
+  password: 'Ntpc@2018',
+  port: 5432
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,55 +32,23 @@ app.use(bodyParser.json());
 // ======================================
 
 app.use(session({
-
-    store: new SQLiteStore({
-        db: 'sessions.db',
-        dir: './'
-    }),
-
     secret: 'futurechatsecret',
-
     resave: false,
-
     saveUninitialized: false,
-
     cookie: {
-
         maxAge: 1000 * 60 * 60 * 24 * 7,
-
-        secure: false,
-
-        httpOnly: true
-
+        httpOnly: true,
+        secure: false
     }
-
 }));
 
 // ======================================
 // DATABASE
 // ======================================
 
-const db = new sqlite3.Database('chatapp.db');
 
-db.serialize(() => {
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT
-        )
-    `);
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sender TEXT,
-            receiver TEXT,
-            message TEXT,
-            time TEXT
-        )
-    `);
 
 });
 
