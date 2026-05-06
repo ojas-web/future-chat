@@ -50,7 +50,7 @@ app.use(session({
 
 
 
-});
+
 
 // ======================================
 // LOGIN CHECK
@@ -546,11 +546,16 @@ ${usersHtml}
 let openChats = {};
 
 function toggleChat(username) {
-  const panel = document.getElementById('chat-' + username);
-  if (!panel) return;
 
-  panel.style.display =
-    panel.style.display === 'block' ? 'none' : 'block';
+const panel = document.getElementById('chat-' + username);
+
+if (!panel) return;
+
+if (panel.style.display === 'none' || panel.style.display === '') {
+    panel.style.display = 'block';
+} else {
+    panel.style.display = 'none';
+}
 }
 
 
