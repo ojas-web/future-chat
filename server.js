@@ -101,14 +101,15 @@ app.post('/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     await pool.query(
-      'INSERT INTO users(username, password) VALUES($1,$2)',
+      'INSERT INTO users(username, password) VALUES($1, $2)',
       [username, hashed]
     );
 
+    console.log("User created:", username);
     res.redirect('/');
   } catch (err) {
-    console.log(err.message);
-    res.send("User already exists or error");
+    console.log("REGISTER ERROR:", err.message);
+    res.send("User already exists or DB error");
   }
 });
 
