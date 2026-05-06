@@ -127,11 +127,12 @@ app.post('/login', async (req, res) => {
     );
 
     const user = result.rows[0];
+
     if (!user) return res.send("User not found");
 
-    const ok = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password);
 
-    if (ok) {
+    if (match) {
       req.session.user = username;
       res.redirect('/chat');
     } else {
@@ -139,9 +140,8 @@ app.post('/login', async (req, res) => {
     }
 
   } catch (err) {
-    console.log(err.message);
-    console.log(err);
-res.send(err.message);
+    console.log("LOGIN ERROR:", err.message);
+    res.send("Server error");
   }
 });
 
