@@ -27,7 +27,7 @@ const pool = new Pool({
 
 pool.connect()
   .then(() => console.log("DB connected"))
-  .catch(err => console.log("DB ERROR:", err.message));
+  .catch(err => console.error("DB ERROR:", err));
 // ======================================
 // MIDDLEWARE
 // ======================================
