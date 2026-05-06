@@ -251,71 +251,58 @@ Register
 // REGISTER
 // ======================================
 
-app.post('/register',async(req,res)=>{
+app.post('/register', async (req, res) => {
 
-const { username,password } = req.body;
+const { username, password } = req.body;
 
-const hashed =
-await bcrypt.hash(password,10);
+const hashed = await bcrypt.hash(password, 10);
 
-db.run(
-'INSERT INTO users(username,password) VALUES(?,?)',
-[username,hashed],
+try {
+  await pool.query(
+    'INSERT INTO users(username, password) VALUES($1, $2)',
+    [username, hashed]
+  );
 
-function(err){
+  console.log("User created:", username);
+  res.redirect('/');
 
-if(err){
-
-return res.send('User already exists');
-
+} catch (err) {
+  console.log("DB ERROR:", err.message);
+  res.send("User already exists or DB error");
 }
-
-res.redirect('/');
-
-}
-
-);
 
 });
-
 // ======================================
 // LOGIN
 // ======================================
 
-app.post('/login',(req,res)=>{
+app.post('/login', async (req, res) => {
 
-const { username,password } = req.body;
+const { username, password } = req.body;
 
-db.get(
-'SELECT * FROM users WHERE username=?',
-[username],
+try {
+  const result = await pool.query(
+    'SELECT * FROM users WHERE username=$1',
+    [username]
+  );
 
-async(err,row)=>{
+  const user = result.rows[0];
 
-if(!row){
+  if (!user) return res.send("User not found");
 
-return res.send('User not found');
+  const match = await bcrypt.compare(password, user.password);
 
+  if (match) {
+    req.session.user = username;
+    res.redirect('/chat');
+  } else {
+    res.send("Wrong password");
+  }
+
+} catch (err) {
+  console.log(err.message);
+  res.send("Server error");
 }
-
-const match =
-await bcrypt.compare(password,row.password);
-
-if(match){
-
-req.session.user = username;
-
-res.redirect('/chat');
-
-}else{
-
-res.send('Wrong password');
-
-}
-
-}
-
-);
 
 });
 
@@ -327,33 +314,10 @@ app.get('/chat',isLoggedIn,(req,res)=>{
 
 const user = req.session.user;
 
-db.all(
-'SELECT username FROM users WHERE username != ?',
-[user],
-
-(err,users)=>{
-
-db.all(
-'SELECT * FROM messages ORDER BY id ASC',
-[],
-
-(err,messages)=>{
-
-let usersHtml='';
-
-users.forEach(u=>{
-
-const userMessages =
-messages.filter(m=>
-
-(m.sender===user && m.receiver===u.username)
-
-||
-
-(m.sender===u.username && m.receiver===user)
-
+const result = await pool.query(
+  'SELECT username FROM users WHERE username != $1',
+  [user]
 );
-
 let chats='';
 
 userMessages.forEach(m=>{
