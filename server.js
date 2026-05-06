@@ -886,19 +886,7 @@ typing=false;
 
 });
 
-setInterval(()=>{
 
-if(!typing){
-
-saveScroll();
-
-saveState();
-
-location.reload();
-
-}
-
-},10000);
 
 </script>
 
