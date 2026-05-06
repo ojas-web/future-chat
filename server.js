@@ -14,6 +14,10 @@ const PORT = process.env.PORT || 3000;
 // ======================================
 // DATABASE (POSTGRES ONLY)
 // ======================================
+pool.connect()
+  .then(() => console.log("DB connected"))
+  .catch(err => console.log("DB ERROR:", err.message));
+
 
 const pool = new Pool({
   user: 'postgres',
@@ -134,7 +138,8 @@ app.post('/login', async (req, res) => {
 
   } catch (err) {
     console.log(err.message);
-    res.send("Server error");
+    console.log(err);
+res.send(err.message);
   }
 });
 
