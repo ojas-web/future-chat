@@ -290,8 +290,6 @@ app.get('/chat', isLoggedIn, async (req, res) => {
 
 const user = req.session.user;
 
-try {
-
 const usersResult = await pool.query(
   'SELECT username FROM users WHERE username != $1',
   [user]
@@ -317,17 +315,16 @@ let chats = '';
 
 userMessages.forEach(m => {
   chats += `
-  <div class="msg">
-    <b>${m.sender}</b> ➜ <b>${m.receiver}</b><br><br>
-    ${m.message}
-    <div class="time">${m.time}</div>
-  </div>
+    <div class="msg">
+      <b>${m.sender}</b> ➜ <b>${m.receiver}</b><br><br>
+      ${m.message}
+      <div class="time">${m.time}</div>
+    </div>
   `;
 });
 
 usersHtml += `
 <div class="user-section">
-
 <button class="toggle-btn" onclick="toggleChat('${u.username}')">
 ${u.username}
 </button>
@@ -336,9 +333,9 @@ ${u.username}
 ${chats}
 
 <form action="/send" method="POST">
-  <input type="hidden" name="receiver" value="${u.username}">
-  <textarea name="message" required></textarea>
-  <button type="submit">Send 🚀</button>
+<input type="hidden" name="receiver" value="${u.username}">
+<textarea name="message" required></textarea>
+<button type="submit">Send 🚀</button>
 </form>
 
 </div>
@@ -347,12 +344,7 @@ ${chats}
 
 });
 
-res.send(`YOUR_HTML_HERE_REMAIN_UNCHANGED_EXCEPT_SCRIPT`);
-
-} catch (err) {
-console.log(err.message);
-res.send("Server error");
-}
+res.send(`FULL_HTML_HERE`);
 
 });
 
@@ -795,17 +787,7 @@ const { receiver,message } = req.body;
 const time=
 new Date().toLocaleString();
 
-db.run(
-'INSERT INTO messages(sender,receiver,message,time) VALUES(?,?,?,?)',
-[sender,receiver,message,time],
 
-()=>{
-
-res.redirect('/chat');
-
-}
-
-);
 
 });
 
@@ -819,19 +801,7 @@ const user = req.session.user;
 
 const { id } = req.body;
 
-db.run(
 
-'DELETE FROM messages WHERE id=? AND sender=?',
-
-[id,user],
-
-()=>{
-
-res.redirect('/chat');
-
-}
-
-);
 
 });
 // ======================================
