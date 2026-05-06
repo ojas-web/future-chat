@@ -719,7 +719,7 @@ document.querySelectorAll("textarea").forEach(t => {
 }
 );
 
-});
+
 
 // ======================================
 // SAVE SCROLL
