@@ -263,7 +263,8 @@ try {
   );
 
   const user = result.rows[0];
-
+console.log(user)
+console.log(password)
   if (!user) return res.send("User not found");
 
   const match = await bcrypt.compare(password, user.password);
