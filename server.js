@@ -290,100 +290,69 @@ app.get('/chat', isLoggedIn, async (req, res) => {
 
 const user = req.session.user;
 
-const result = await pool.query(
+try {
+
+const usersResult = await pool.query(
   'SELECT username FROM users WHERE username != $1',
   [user]
 );
-let chats='';
 
-userMessages.forEach(m=>{
+const messagesResult = await pool.query(
+  'SELECT * FROM messages ORDER BY id ASC'
+);
 
-chats += `
+const users = usersResult.rows;
+const messages = messagesResult.rows;
 
-<div class="msg">
+let usersHtml = '';
 
-<b>${m.sender}</b>
-➜
-<b>${m.receiver}</b>
+users.forEach(u => {
 
-<br><br>
+const userMessages = messages.filter(m =>
+  (m.sender === user && m.receiver === u.username) ||
+  (m.sender === u.username && m.receiver === user)
+);
 
-${m.message}
+let chats = '';
 
-<div class="time">
-${m.time}
-</div>
+userMessages.forEach(m => {
+  chats += `
+  <div class="msg">
+    <b>${m.sender}</b> ➜ <b>${m.receiver}</b><br><br>
+    ${m.message}
+    <div class="time">${m.time}</div>
+  </div>
+  `;
+});
 
-<form
-action="/delete-message"
-method="POST"
-onsubmit="return confirm('Delete this message?')"
->
+usersHtml += `
+<div class="user-section">
 
-<input
-type="hidden"
-name="id"
-value="${m.id}"
->
-
-<button class="delete-btn">
-🗑 Delete
+<button class="toggle-btn" onclick="toggleChat('${u.username}')">
+${u.username}
 </button>
 
+<div class="chat-panel" id="chat-${u.username}" style="display:none;">
+${chats}
+
+<form action="/send" method="POST">
+  <input type="hidden" name="receiver" value="${u.username}">
+  <textarea name="message" required></textarea>
+  <button type="submit">Send 🚀</button>
 </form>
 
 </div>
-
+</div>
 `;
 
 });
 
-usersHtml += `
+res.send(`YOUR_HTML_HERE_REMAIN_UNCHANGED_EXCEPT_SCRIPT`);
 
-<div class="user-section">
-
-<button
-class="toggle-btn"
-onclick="toggleChat('${u.username}')"
->
-
- ${u.username}
-
-</button>
-
-<div
-class="chat-panel"
-id="chat-${u.username}"
-style="display:none;"
->
-
-${chats}
-
-<form action="/send" method="POST">
-
-<input
-type="hidden"
-name="receiver"
-value="${u.username}"
->
-
-<textarea
-name="message"
-placeholder="Type message..."
-required
-></textarea>
-
-<button type="submit">
-Send 🚀
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-`;
+} catch (err) {
+console.log(err.message);
+res.send("Server error");
+}
 
 });
 
