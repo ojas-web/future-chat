@@ -286,7 +286,7 @@ try {
 // CHAT PAGE
 // ======================================
 
-app.get('/chat',isLoggedIn,(req,res)=>{
+app.get('/chat', isLoggedIn, async (req, res) => {
 
 const user = req.session.user;
 
