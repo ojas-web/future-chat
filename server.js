@@ -1,33 +1,17 @@
 // ======================================
-// FUTURE CHAT APP - CLEAN WORKING VERSION
+// FUTURE CHAT APP - FINAL FIXED VERSION
 // ======================================
 
 const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 const bcrypt = require('bcrypt');
-const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ======================================
-// DATABASE (POSTGRES ONLY)
-// ======================================
-
-
-
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'chatapp',
-  password: 'Ntpc@2018',
-  port: 5432
-});
-
-pool.connect()
-  .then(() => console.log("DB connected"))
-  .catch(err => console.error("DB ERROR:", err));
 // ======================================
 // MIDDLEWARE
 // ======================================
@@ -35,236 +19,1008 @@ pool.connect()
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// ======================================
+// SESSION
+// ======================================
+
 app.use(session({
-  secret: 'futurechatsecret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-    httpOnly: true
-  }
+
+    store: new SQLiteStore({
+        db: './data/sessions.db',
+        dir: './'
+    }),
+
+    secret: 'futurechatsecret',
+
+    resave: false,
+
+    saveUninitialized: false,
+
+    cookie: {
+
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+
+        secure: false,
+
+        httpOnly: true
+
+    }
+
 }));
 
 // ======================================
-// AUTH MIDDLEWARE
+// DATABASE
 // ======================================
 
-function isLoggedIn(req, res, next) {
-  if (req.session.user) return next();
-  res.redirect('/');
+const db = new sqlite3.Database('./data/chatapp.db');
+
+db.serialize(() => {
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    `);
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender TEXT,
+            receiver TEXT,
+            message TEXT,
+            time TEXT
+        )
+    `);
+
+});
+
+// ======================================
+// LOGIN CHECK
+// ======================================
+
+function isLoggedIn(req,res,next){
+
+    if(req.session.user){
+
+        next();
+
+    }else{
+
+        res.redirect('/');
+
+    }
+
 }
 
 // ======================================
 // HOME PAGE
 // ======================================
 
-app.get('/', (req, res) => {
-  if (req.session.user) return res.redirect('/chat');
+app.get('/',(req,res)=>{
 
-  res.send(`
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <title>Future Chat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  <body>
-    <h1>Login</h1>
+if(req.session.user){
 
-    <form method="POST" action="/login">
-      <input name="username" placeholder="Username" required />
-      <input name="password" type="password" placeholder="Password" required />
-      <button>Login</button>
-    </form>
+return res.redirect('/chat');
 
-    <h1>Register</h1>
+}
 
-    <form method="POST" action="/register">
-      <input name="username" placeholder="Username" required />
-      <input name="password" type="password" placeholder="Password" required />
-      <button>Register</button>
-    </form>
+res.send(`
 
-  </body>
-  </html>
-  `);
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Future Chat</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:linear-gradient(135deg,#020617,#0f172a,#312e81);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+}
+
+.container{
+width:420px;
+background:rgba(255,255,255,0.08);
+padding:40px;
+border-radius:25px;
+backdrop-filter:blur(15px);
+box-shadow:0 0 40px rgba(0,255,255,0.2);
+}
+
+h1{
+text-align:center;
+margin-bottom:25px;
+font-size:42px;
+background:linear-gradient(to right,cyan,purple);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+input{
+width:100%;
+padding:15px;
+margin:12px 0;
+border:none;
+border-radius:15px;
+background:rgba(255,255,255,0.15);
+color:white;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:10px;
+border:none;
+border-radius:15px;
+background:cyan;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+background:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>
+🚀 Future Chat
+</h1>
+
+<form action="/login" method="POST">
+
+<input
+type="text"
+name="username"
+placeholder="Username"
+required
+>
+
+<input
+type="password"
+name="password"
+placeholder="Password"
+required
+>
+
+<button type="submit">
+Login
+</button>
+
+</form>
+
+<form action="/register" method="POST">
+
+<input
+type="text"
+name="username"
+placeholder="Create Username"
+required
+>
+
+<input
+type="password"
+name="password"
+placeholder="Create Password"
+required
+>
+
+<button type="submit">
+Register
+</button>
+
+</form>
+
+</div>
+
+</body>
+</html>
+
+`);
+
 });
 
 // ======================================
 // REGISTER
 // ======================================
 
-app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+app.post('/register',async(req,res)=>{
 
-  try {
-    const hashed = await bcrypt.hash(password, 10);
+const { username,password } = req.body;
 
-    await pool.query(
-      'INSERT INTO users(username, password) VALUES($1, $2)',
-      [username, hashed]
-    );
+const hashed =
+await bcrypt.hash(password,10);
 
-    console.log("User created:", username);
-    res.redirect('/');
-  } catch (err) {
-    console.log("REGISTER ERROR:", err.message);
-    res.send("User already exists or DB error");
-  }
+db.run(
+'INSERT INTO users(username,password) VALUES(?,?)',
+[username,hashed],
+
+function(err){
+
+if(err){
+
+return res.send('User already exists');
+
+}
+
+res.redirect('/');
+
+}
+
+);
+
 });
 
 // ======================================
 // LOGIN
 // ======================================
 
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+app.post('/login',(req,res)=>{
 
-  try {
-    const result = await pool.query(
-      'SELECT * FROM users WHERE username=$1',
-      [username]
-    );
+const { username,password } = req.body;
 
-    const user = result.rows[0];
+db.get(
+'SELECT * FROM users WHERE username=?',
+[username],
 
-    if (!user) return res.send("User not found");
+async(err,row)=>{
 
-    const match = await bcrypt.compare(password, user.password);
+if(!row){
 
-    if (match) {
-      req.session.user = username;
-      res.redirect('/chat');
-    } else {
-      res.send("Wrong password");
-    }
+return res.send('User not found');
 
-  } catch (err) {
-    console.log("LOGIN ERROR:", err.message);
-    res.send("Server error");
-  }
+}
+
+const match =
+await bcrypt.compare(password,row.password);
+
+if(match){
+
+req.session.user = username;
+
+res.redirect('/chat');
+
+}else{
+
+res.send('Wrong password');
+
+}
+
+}
+
+);
+
 });
 
 // ======================================
 // CHAT PAGE
 // ======================================
 
-app.get('/chat', isLoggedIn, async (req, res) => {
-  const user = req.session.user;
+app.get('/chat',isLoggedIn,(req,res)=>{
 
-  try {
-    const usersRes = await pool.query(
-      'SELECT username FROM users WHERE username != $1',
-      [user]
-    );
+const user = req.session.user;
 
-    const msgRes = await pool.query(
-      'SELECT * FROM messages ORDER BY id ASC'
-    );
+db.all(
+'SELECT username FROM users WHERE username != ?',
+[user],
 
-    const users = usersRes.rows;
-    const messages = msgRes.rows;
+(err,users)=>{
 
-    let usersHtml = '';
+db.all(
+'SELECT * FROM messages ORDER BY id ASC',
+[],
 
-    users.forEach(u => {
+(err,messages)=>{
 
-      const chat = messages.filter(m =>
-        (m.sender === user && m.receiver === u.username) ||
-        (m.sender === u.username && m.receiver === user)
-      );
+let usersHtml='';
 
-      let chatHtml = '';
+users.forEach(u=>{
 
-      chat.forEach(m => {
-        chatHtml += `
-          <div>
-            <b>${m.sender}</b>: ${m.message}
-            <small>${m.time}</small>
-          </div>
-        `;
-      });
+const userMessages =
+messages.filter(m=>
 
-      usersHtml += `
-        <div style="margin:10px;padding:10px;border:1px solid #ccc;">
-          <button onclick="toggleChat('${u.username}')">
-            ${u.username}
-          </button>
+(m.sender===user && m.receiver===u.username)
 
-          <div id="chat-${u.username}" style="display:none;">
-            ${chatHtml}
+||
 
-            <form method="POST" action="/send">
-              <input type="hidden" name="receiver" value="${u.username}">
-              <input name="message" placeholder="Type..." required />
-              <button>Send</button>
-            </form>
-          </div>
-        </div>
-      `;
-    });
+(m.sender===u.username && m.receiver===user)
 
-    res.send(`
-    <html>
-    <body>
+);
 
-      <h2>Welcome ${user}</h2>
-      <a href="/logout">Logout</a>
+let chats='';
 
-      ${usersHtml}
+userMessages.forEach(m=>{
 
-      <script>
-        function toggleChat(user) {
-          const el = document.getElementById('chat-' + user);
-          if (!el) return;
-          el.style.display = (el.style.display === 'none' || el.style.display === '')
-            ? 'block'
-            : 'none';
-        }
-      </script>
+chats += `
 
-    </body>
-    </html>
-    `);
+<div class="msg">
 
-  } catch (err) {
-    console.log(err.message);
-    res.send("Error loading chat");
-  }
+<b>${m.sender}</b>
+➜
+<b>${m.receiver}</b>
+
+<br><br>
+
+${m.message}
+
+<div class="time">
+${m.time}
+</div>
+
+<form
+action="/delete-message"
+method="POST"
+onsubmit="return confirm('Delete this message?')"
+>
+
+<input
+type="hidden"
+name="id"
+value="${m.id}"
+>
+
+<button class="delete-btn">
+🗑 Delete
+</button>
+
+</form>
+
+</div>
+
+`;
+
+});
+
+usersHtml += `
+
+<div class="user-section">
+
+<button
+class="toggle-btn"
+onclick="toggleChat('${u.username}')"
+>
+
+ ${u.username}
+
+</button>
+
+<div
+class="chat-panel"
+id="chat-${u.username}"
+style="display:none;"
+>
+
+${chats}
+
+<form action="/send" method="POST">
+
+<input
+type="hidden"
+name="receiver"
+value="${u.username}"
+>
+
+<textarea
+name="message"
+placeholder="Type message..."
+required
+></textarea>
+
+<button type="submit">
+Send 🚀
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+res.send(`
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Future Chat</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+.delete-btn{
+
+background:red;
+color:white;
+padding:8px 15px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:14px;
+width:auto;
+
+}
+
+.delete-btn:hover{
+
+background:darkred;
+
+}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:linear-gradient(135deg,#020617,#111827,#312e81);
+color:white;
+padding:20px;
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+font-size:45px;
+background:linear-gradient(to right,cyan,purple);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.chat-box{
+max-width:900px;
+margin:auto;
+background:rgba(255,255,255,0.08);
+padding:25px;
+border-radius:25px;
+backdrop-filter:blur(10px);
+box-shadow:0 0 30px rgba(0,255,255,0.2);
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.logout{
+background:red;
+color:white;
+padding:10px 20px;
+width:auto;
+}
+
+.user-section{
+margin-bottom:20px;
+}
+
+.toggle-btn{
+width:100%;
+padding:15px;
+border:none;
+border-radius:15px;
+background:cyan;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+.toggle-btn:hover{
+transform:scale(1.03);
+background:white;
+}
+
+.chat-panel{
+margin-top:10px;
+padding:15px;
+border-radius:15px;
+background:rgba(255,255,255,0.08);
+}
+
+.msg{
+background:rgba(255,255,255,0.1);
+padding:15px;
+border-radius:15px;
+margin-top:10px;
+line-height:1.5;
+}
+
+.time{
+font-size:12px;
+margin-top:5px;
+color:#ccc;
+}
+
+textarea{
+width:100%;
+height:100px;
+padding:15px;
+margin-top:15px;
+border:none;
+border-radius:15px;
+background:rgba(255,255,255,0.12);
+color:white;
+resize:none;
+font-size:16px;
+}
+
+button{
+margin-top:10px;
+padding:15px;
+border:none;
+border-radius:15px;
+background:cyan;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.03);
+background:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>
+💬 Future Chat System
+</h1>
+
+<div class="chat-box">
+
+<div class="top">
+
+<h2>
+Welcome ${user}
+</h2>
+
+<form action="/logout" method="GET">
+
+<button class="logout">
+Logout
+</button>
+
+</form>
+
+</div>
+
+${usersHtml}
+
+</div>
+
+<script>
+
+// ======================================
+// CHAT OPEN/CLOSE
+// ======================================
+
+let openChats = {};
+
+function toggleChat(username){
+
+const panel =
+document.getElementById(
+'chat-' + username
+);
+
+if(panel.style.display==='none'){
+
+panel.style.display='block';
+
+openChats[username]=true;
+
+}else{
+
+panel.style.display='none';
+
+openChats[username]=false;
+
+}
+
+saveState();
+
+}
+
+// ======================================
+// SAVE CHAT STATE
+// ======================================
+
+function saveState(){
+
+const opened=[];
+
+for(let user in openChats){
+
+if(openChats[user]){
+
+opened.push(user);
+
+}
+
+}
+
+sessionStorage.setItem(
+'openedChats',
+JSON.stringify(opened)
+);
+
+}
+
+// ======================================
+// RESTORE CHAT STATE
+// ======================================
+
+window.addEventListener(
+'load',
+()=>{
+
+const saved=
+JSON.parse(
+sessionStorage.getItem(
+'openedChats'
+)
+)||[];
+
+saved.forEach(username=>{
+
+const panel=
+document.getElementById(
+'chat-'+username
+);
+
+if(panel){
+
+panel.style.display='block';
+
+openChats[username]=true;
+
+}
+
+});
+
+// RESTORE TEXT
+
+document.querySelectorAll('textarea')
+.forEach(t=>{
+
+const savedText =
+sessionStorage.getItem(
+'draft-' + t.parentElement.querySelector('input[name="receiver"]').value
+);
+
+if(savedText){
+
+t.value = savedText;
+
+}
+
+});
+
+// RESTORE SCROLL
+
+const scrollPos =
+sessionStorage.getItem(
+'scrollPosition'
+);
+
+if(scrollPos){
+
+window.scrollTo(
+0,
+parseInt(scrollPos)
+);
+
+}
+
+}
+);
+
+// ======================================
+// SAVE DRAFT
+// ======================================
+
+document.querySelectorAll('textarea')
+.forEach(t=>{
+
+t.addEventListener(
+'input',
+()=>{
+
+const receiver =
+t.parentElement.querySelector(
+'input[name="receiver"]'
+).value;
+
+sessionStorage.setItem(
+'draft-' + receiver,
+t.value
+);
+
+// ======================================
+// CLEAR TEXT AFTER SEND
+// ======================================
+
+document.querySelectorAll('form')
+.forEach(form=>{
+
+form.addEventListener(
+'submit',
+()=>{
+
+const textarea =
+form.querySelector('textarea');
+
+if(textarea){
+
+const receiver =
+form.querySelector(
+'input[name="receiver"]'
+).value;
+
+sessionStorage.removeItem(
+'draft-' + receiver
+);
+
+textarea.value='';
+
+}
+
+}
+);
+
+});
+}
+);
+
+});
+
+// ======================================
+// SAVE SCROLL
+// ======================================
+
+function saveScroll(){
+
+sessionStorage.setItem(
+'scrollPosition',
+window.scrollY
+);
+
+}
+
+window.addEventListener(
+'scroll',
+saveScroll
+);
+
+window.addEventListener(
+'beforeunload',
+saveScroll
+);
+
+// ======================================
+// SAVE BEFORE SEND
+// ======================================
+
+document.querySelectorAll('form')
+.forEach(form=>{
+
+form.addEventListener(
+'submit',
+()=>{
+
+saveScroll();
+
+saveState();
+
+}
+);
+
+});
+
+// ======================================
+// SMART AUTO REFRESH
+// ======================================
+
+let typing=false;
+
+document.querySelectorAll('textarea')
+.forEach(t=>{
+
+t.addEventListener(
+'focus',
+()=>{
+
+typing=true;
+
+}
+);
+
+t.addEventListener(
+'blur',
+()=>{
+
+typing=false;
+
+}
+);
+
+});
+
+setInterval(()=>{
+
+if(!typing){
+
+saveScroll();
+
+saveState();
+
+location.reload();
+
+}
+
+},10000);
+
+</script>
+
+</body>
+</html>
+
+`);
+
+}
+
+);
+
+}
+
+);
+
 });
 
 // ======================================
 // SEND MESSAGE
 // ======================================
 
-app.post('/send', isLoggedIn, async (req, res) => {
-  const sender = req.session.user;
-  const { receiver, message } = req.body;
+app.post('/send',isLoggedIn,(req,res)=>{
 
-  const time = new Date().toLocaleString();
+const sender=req.session.user;
 
-  await pool.query(
-    'INSERT INTO messages(sender, receiver, message, time) VALUES($1,$2,$3,$4)',
-    [sender, receiver, message, time]
-  );
+const { receiver,message } = req.body;
 
-  res.redirect('/chat');
+const time=
+new Date().toLocaleString();
+
+db.run(
+'INSERT INTO messages(sender,receiver,message,time) VALUES(?,?,?,?)',
+[sender,receiver,message,time],
+
+()=>{
+
+res.redirect('/chat');
+
+}
+
+);
+
 });
 
+// ======================================
+// DELETE MESSAGE
+// ======================================
+
+app.post('/delete-message',isLoggedIn,(req,res)=>{
+
+const user = req.session.user;
+
+const { id } = req.body;
+
+db.run(
+
+'DELETE FROM messages WHERE id=? AND sender=?',
+
+[id,user],
+
+()=>{
+
+res.redirect('/chat');
+
+}
+
+);
+
+});
 // ======================================
 // LOGOUT
 // ======================================
 
-app.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/');
-  });
+app.get('/logout',(req,res)=>{
+
+req.session.destroy();
+
+res.redirect('/');
+
 });
 
 // ======================================
 // START SERVER
 // ======================================
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT,()=>{
+
+console.log(
+'🚀 Server running on http://localhost:3000'
+);
+
 });
+
+/*
+
+======================================
+
+INSTALL
+
+======================================
+
+npm init -y
+
+npm install express sqlite3 body-parser express-session bcrypt connect-sqlite3
+
+======================================
+
+RUN
+
+======================================
+
+node server.js
+
+======================================
+
+OPEN
+
+======================================
+
+http://localhost:3000
+
+======================================
+
+*/
