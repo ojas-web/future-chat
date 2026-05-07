@@ -25,11 +25,10 @@ app.use(bodyParser.json());
 
 app.use(session({
 
-    store: new SQLiteStore({
-        db: './data/sessions.db',
-        dir: './'
-    }),
-
+   store: new SQLiteStore({
+    db: 'sessions.db',
+    dir: './'
+}),
     secret: 'futurechatsecret',
 
     resave: false,
@@ -52,7 +51,7 @@ app.use(session({
 // DATABASE
 // ======================================
 
-const db = new sqlite3.Database('./data/chatapp.db');
+const db = new sqlite3.Database('chatapp.db');
 
 db.serialize(() => {
 
