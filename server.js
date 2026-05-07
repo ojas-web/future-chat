@@ -758,11 +758,9 @@ parseInt(scrollPos)
 // ======================================
 
 document.querySelectorAll('textarea')
-.forEach(t=>{
+.forEach(t => {
 
-t.addEventListener(
-'input',
-()=>{
+t.addEventListener('input', () => {
 
 const receiver =
 t.parentElement.querySelector(
@@ -774,16 +772,18 @@ sessionStorage.setItem(
 t.value
 );
 
+});
+
+});
+
 // ======================================
 // CLEAR TEXT AFTER SEND
 // ======================================
 
 document.querySelectorAll('form')
-.forEach(form=>{
+.forEach(form => {
 
-form.addEventListener(
-'submit',
-()=>{
+form.addEventListener('submit', () => {
 
 const textarea =
 form.querySelector('textarea');
@@ -803,12 +803,7 @@ textarea.value='';
 
 }
 
-}
-);
-
 });
-}
-);
 
 });
 
