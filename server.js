@@ -264,9 +264,8 @@ db.run(
 function(err){
 
 if(err){
-
-return res.send('User already exists');
-
+    console.log(err);
+    return res.send(err.message);
 }
 
 res.redirect('/');
