@@ -3,7 +3,7 @@
 // ======================================
 
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
@@ -12,6 +12,23 @@ const bcrypt = require('bcrypt');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+const mysql = require('mysql2');
+
+const db = mysql.createConnection({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'Ntpc@2018',
+    database: process.env.DB_NAME || 'chatapp',
+    port: process.env.DB_PORT || 3307
+});
+db.connect((err) => {
+  if(err){
+    console.log(err);
+  } else {
+    console.log('MySQL Connected');
+  }
+});
 // ======================================
 // MIDDLEWARE
 // ======================================
@@ -51,29 +68,9 @@ app.use(session({
 // DATABASE
 // ======================================
 
-const db = new sqlite3.Database('chatapp.db');
 
-db.serialize(() => {
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT
-        )
-    `);
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sender TEXT,
-            receiver TEXT,
-            message TEXT,
-            time TEXT
-        )
-    `);
-
-});
 
 // ======================================
 // LOGIN CHECK
@@ -250,29 +247,32 @@ Register
 // REGISTER
 // ======================================
 
-app.post('/register',async(req,res)=>{
+app.post('/register', async (req, res) => {
 
-const { username,password } = req.body;
+const { username, password } = req.body;
 
-const hashed =
-await bcrypt.hash(password,10);
+const hashed = await bcrypt.hash(password, 10);
 
-db.run(
+db.query(
 'INSERT INTO users(username,password) VALUES(?,?)',
-[username,hashed],
+[username, hashed],
 
-function(err){
+(err, result) => {
 
 if(err){
+
     console.log(err);
-    return res.send(err.message);
+
+    if(err.code === 'ER_DUP_ENTRY'){
+        return res.send('Username already exists');
+    }
+
+    return res.send('Database error');
 }
 
 res.redirect('/');
 
-}
-
-);
+});
 
 });
 
@@ -280,40 +280,44 @@ res.redirect('/');
 // LOGIN
 // ======================================
 
-app.post('/login',(req,res)=>{
+app.post('/login', (req, res) => {
 
-const { username,password } = req.body;
+const { username, password } = req.body;
 
-db.get(
+db.query(
 'SELECT * FROM users WHERE username=?',
 [username],
 
-async(err,row)=>{
+async (err, results) => {
 
-if(!row){
-
-return res.send('User not found');
-
+if(err){
+    console.log(err);
+    return res.send("DB Error");
 }
 
-const match =
-await bcrypt.compare(password,row.password);
+if(results.length === 0){
+    return res.send('User not found');
+}
+
+const user = results[0];
+
+const match = await bcrypt.compare(
+    password,
+    user.password
+);
 
 if(match){
 
-req.session.user = username;
-
-res.redirect('/chat');
+    req.session.user = username;
+    res.redirect('/chat');
 
 }else{
 
-res.send('Wrong password');
+    res.send('Wrong password');
 
 }
 
-}
-
-);
+});
 
 });
 
@@ -325,19 +329,19 @@ app.get('/chat',isLoggedIn,(req,res)=>{
 
 const user = req.session.user;
 
-db.all(
+db.query(
 'SELECT username FROM users WHERE username != ?',
 [user],
-
 (err,users)=>{
 
-db.all(
+db.query(
+
 'SELECT * FROM messages ORDER BY id ASC',
-[],
 
 (err,messages)=>{
 
 let usersHtml='';
+
 
 users.forEach(u=>{
 
@@ -424,8 +428,8 @@ type="hidden"
 name="receiver"
 value="${u.username}"
 >
-
 <textarea
+id="msgbox"
 name="message"
 placeholder="Type message..."
 required
@@ -799,7 +803,7 @@ sessionStorage.removeItem(
 'draft-' + receiver
 );
 
-textarea.value='';
+
 
 }
 
@@ -914,26 +918,33 @@ location.reload();
 // SEND MESSAGE
 // ======================================
 
-app.post('/send',isLoggedIn,(req,res)=>{
+app.post('/send', isLoggedIn, (req, res) => {
 
-const sender=req.session.user;
 
-const { receiver,message } = req.body;
 
-const time=
-new Date().toLocaleString();
+const sender = req.session.user;
 
-db.run(
+console.log(req.body);
+
+const receiver = req.body.receiver;
+const message = req.body.message;
+
+const time = new Date().toLocaleString();
+
+db.query(
 'INSERT INTO messages(sender,receiver,message,time) VALUES(?,?,?,?)',
-[sender,receiver,message,time],
+[sender, receiver, message, time],
 
-()=>{
+(err) => {
+
+if(err){
+    console.log(err);
+    return res.send("DB Error");
+}
 
 res.redirect('/chat');
 
-}
-
-);
+});
 
 });
 
@@ -947,7 +958,7 @@ const user = req.session.user;
 
 const { id } = req.body;
 
-db.run(
+db.query(
 
 'DELETE FROM messages WHERE id=? AND sender=?',
 
