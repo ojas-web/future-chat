@@ -442,7 +442,104 @@ if(match){
 
 }else{
 
-    res.send('Wrong password');
+    res.send('
+             <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wrong Password</title>
+<style>
+    /* Reset default styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #ff4e50, #f9d423);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        text-align: center;
+        max-width: 350px;
+        width: 100%;
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .icon {
+        font-size: 60px;
+        color: #ff4e50;
+        animation: shake 0.4s ease-in-out;
+    }
+
+    h1 {
+        margin-top: 1rem;
+        font-size: 1.8rem;
+        color: #333;
+    }
+
+    p {
+        margin: 0.8rem 0 1.5rem;
+        color: #666;
+    }
+
+    button {
+        background: #ff4e50;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    button:hover {
+        background: #e13c3e;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-8px); }
+        40%, 80% { transform: translateX(8px); }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="icon">❌</div>
+    <h1>Wrong Password</h1>
+    <p>Please check your password and try again.</p>
+    <button onclick="retryLogin()">Try Again</button>
+</div>
+
+<script>
+    function retryLogin() {
+        // Redirect to login page (change URL as needed)
+        window.location.href = "https://future-chat-production.up.railway.app/chat";
+    }
+</script>
+
+</body>
+</html>
+');
 
 }
 
