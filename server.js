@@ -3,7 +3,7 @@
 // ======================================
 
 
-
+const http = require('http');
 const express = require('express');
 
 const bodyParser = require('body-parser');
@@ -14,11 +14,11 @@ const bcrypt = require('bcrypt');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const http = require('http');
+
 
 const PORT = process.env.PORT || 3000;
 
-const http = require('http');
+
 const { Server } = require('socket.io');
 
 const mysql = require('mysql2');
