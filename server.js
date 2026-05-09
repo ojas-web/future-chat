@@ -318,20 +318,114 @@ if(err){
 }
 
 if(results.length === 0){
-    return res.send('
+    return res.send(`
 
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Not Found</title>
+<style>
+    /* Reset & Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    /* Container */
+    .container {
+        max-width: 500px;
+        padding: 20px;
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    /* Animated Icon */
+    .icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: bounce 1.5s infinite;
+    }
+
+    /* Headline */
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+    /* Message */
+    p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    /* Button */
+    .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        background: #ff4b5c;
+        color: #fff;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+    .btn:hover {
+        background: #ff1e38;
+    }
+
+    /* Animations */
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+</head>
+<body>
 
 <div class="container">
-   
-    <h1>User Not Created</h1>
-    <p>it looks like this account is not created. </p>
-    <button onclick="retry()">go to home</button>
+    <div class="icon">🚫</div>
+    <h1>User Not Found</h1>
+    <p>Sorry, the user you are looking for does not exist or may have been removed.</p>
+    <a href="https://future-chat-production.up.railway.app/chat" class="btn" id="goHome">Go to Homepage</a>
 </div>
 
+<script>
+    // Optional: Add a small delay before redirect if needed
+    document.getElementById('goHome').addEventListener('click', function(e) {
+        e.preventDefault();
+        this.textContent = "Redirecting...";
+        setTimeout(() => {
+            window.location.href = "https://future-chat-production.up.railway.app/chat";
+        }, 800);
+    });
+</script>
+
+</body>
+</html>
 
 
-');
+
+`);
 }
 
 const user = results[0];
