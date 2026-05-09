@@ -320,77 +320,7 @@ if(err){
 if(results.length === 0){
     return res.send('
 
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Not Created</title>
-<style>
-    /* Reset default styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
 
-    body {
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, #ff4e50, #f9d423);
-    }
-
-    .container {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 2rem;
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        color: white;
-        max-width: 350px;
-        animation: fadeIn 0.8s ease-in-out;
-    }
-
-    .icon {
-        font-size: 60px;
-        margin-bottom: 15px;
-    }
-
-    h1 {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-    }
-
-    p {
-        font-size: 1rem;
-        margin-bottom: 20px;
-        opacity: 0.9;
-    }
-
-    button {
-        background: #ff4e50;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        color: white;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-
-    button:hover {
-        background: #e63e41;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-</head>
-<body>
 
 <div class="container">
    
@@ -399,14 +329,7 @@ if(results.length === 0){
     <button onclick="retry()">go to home</button>
 </div>
 
-<script>
-    function retry() {
-        // Example: Redirect to signup page
-        window.location.href = "signup.html";
-    }
-</script>
 
-</body>
 
 ');
 }
