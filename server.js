@@ -6,7 +6,7 @@ const express = require('express');
 
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+
 const bcrypt = require('bcrypt');
 
 const app = express();
@@ -36,32 +36,20 @@ db.connect((err) => {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.use(express.static('public'));
 // ======================================
 // SESSION
 // ======================================
 
 app.use(session({
-
-   store: new SQLiteStore({
-    db: 'sessions.db',
-    dir: './'
-}),
     secret: 'futurechatsecret',
-
     resave: false,
-
     saveUninitialized: false,
-
     cookie: {
-
         maxAge: 1000 * 60 * 60 * 24 * 7,
-
         secure: false,
-
         httpOnly: true
-
     }
-
 }));
 
 // ======================================
@@ -108,7 +96,7 @@ res.send(`
 <html>
 
 <head>
-
+<link rel="manifest" href="/manifest.json">
 <title>Future Chat</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -235,7 +223,11 @@ Register
 </form>
 
 </div>
-
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/public/service-worker.js');
+}
+</script>
 </body>
 </html>
 
