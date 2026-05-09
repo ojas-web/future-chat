@@ -12,8 +12,14 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+
 const PORT = process.env.PORT || 3000;
 
+const http = require('http');
+const { Server } = require('socket.io');
 
 const mysql = require('mysql2');
 
@@ -898,19 +904,20 @@ typing=false;
 
 });
 
-setInterval(()=>{
 
-if(!typing){
+</script>
 
-saveScroll();
+<script src="/socket.io/socket.io.js"></script>
 
-saveState();
+<script>
 
-location.reload();
+const socket = io();
 
-}
+socket.on('receiveMessage', (data) => {
 
-},10000);
+    location.reload();
+
+});
 
 </script>
 
@@ -935,7 +942,12 @@ location.reload();
 
 app.post('/send', isLoggedIn, (req, res) => {
 
-
+io.emit('receiveMessage', {
+    sender,
+    receiver,
+    message,
+    time
+});
 
 const sender = req.session.user;
 
@@ -1002,9 +1014,21 @@ res.redirect('/');
 
 // ======================================
 // START SERVER
-// ======================================
+// =====================================
+io.on('connection', (socket) => {
 
-app.listen(PORT,()=>{
+    console.log('User connected');
+
+    socket.on('sendMessage', (data) => {
+
+        io.emit('receiveMessage', data);
+
+    });
+
+});
+
+
+server.listen(PORT,()=>{
 
 console.log(
 '🚀 Server running on http://localhost:3000'
