@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS messages (
 `);
 
 app.use(express.static('public'));
-// ======================================
+// ======================================  
 // MIDDLEWARE
 // ======================================
 
@@ -943,19 +943,20 @@ socket.on('receiveMessage', (data) => {
 
 app.post('/send', isLoggedIn, (req, res) => {
 
-io.emit('receiveMessage', {
-    sender,
-    receiver,
-    message,
-    time
-});
-
 const sender = req.session.user;
 
 console.log(req.body);
 
 const receiver = req.body.receiver;
 const message = req.body.message;
+const time = new Date().toLocaleString();
+
+io.emit('receiveMessage', {
+    sender,
+    receiver,
+    message,
+    time
+});
 
 const time = new Date().toLocaleString();
 
