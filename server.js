@@ -958,8 +958,6 @@ io.emit('receiveMessage', {
     time
 });
 
-const time = new Date().toLocaleString();
-
 db.query(
 'INSERT INTO messages(sender,receiver,message,time) VALUES(?,?,?,?)',
 [sender, receiver, message, time],
