@@ -2,6 +2,8 @@
 // FUTURE CHAT APP - FINAL FIXED VERSION
 // ======================================
 
+
+
 const express = require('express');
 
 const bodyParser = require('body-parser');
@@ -29,6 +31,8 @@ db.connect((err) => {
     console.log('MySQL Connected');
   }
 });
+
+app.use(express.static('public'));
 // ======================================
 // MIDDLEWARE
 // ======================================
@@ -36,7 +40,7 @@ db.connect((err) => {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(express.static('public'));
+
 // ======================================
 // SESSION
 // ======================================
