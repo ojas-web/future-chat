@@ -318,7 +318,7 @@ if(err){
 }
 
 if(results.length === 0){
-    return res.send('User not found');
+    return res.send('<center><h1> It looks like this user is not created </h1></center>');
 }
 
 const user = results[0];
