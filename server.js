@@ -2,7 +2,7 @@
 // FUTURE CHAT APP - FINAL FIXED VERSION
 // ======================================
 
-
+const { Server } = require('socket.io');
 const http = require('http');
 const express = require('express');
 
@@ -13,14 +13,14 @@ const bcrypt = require('bcrypt');
 
 const app = express();
 const server = http.createServer(app);
-const { Server } = require('socket.io');
+
 const io = new Server(server);
 
 
 const PORT = process.env.PORT || 3000;
 
 
-const { Server } = require('socket.io');
+
 
 const mysql = require('mysql2');
 
