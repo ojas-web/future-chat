@@ -318,7 +318,7 @@ if(err){
 }
 
 if(results.length === 0){
-    return res.send('<!DOCTYPE html>
+    return res.send('
 <html lang="en">
 <head>
 <meta charset="UTF-8">
