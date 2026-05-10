@@ -15,4 +15,10 @@
     "mysql2": "^3.14.1",
     "socket.io": "^4.8.1"
   }
+{
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  }
+}
 }
