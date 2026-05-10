@@ -1,24 +1,57 @@
 {
-  "name": "future-chat",
+
+
+  "name": "chatapp",
+
   "version": "1.0.0",
-  "description": "Realtime Future Chat App",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.3",
-    "connect-sqlite3": "^0.9.16",
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "mysql2": "^3.14.1",
-    "socket.io": "^4.8.1"
-  }
-{
+
   "main": "main.js",
+
   "scripts": {
-    "start": "electron ."
+
+    "start": "electron .",
+
+    "dist": "electron-builder"
+
+  },
+
+
+  "devDependencies": {
+
+    "electron": "^30.0.0",
+
+    "electron-builder": "^26.8.1"
+
+  },
+
+ "build": {
+  "appId": "com.chatapp.desktop",
+
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "ojas-web",
+      "repo": "future-chat"
+    }
+  ]
+},
+
+    "nsis": {
+
+      "oneClick": false,
+
+      "allowToChangeInstallationDirectory": true
+
+    }
+
+  },
+
+  "dependencies": {
+
+    "electron-log": "^5.4.3",
+
+    "electron-updater": "^6.8.3"
+
   }
-}
+
 }
