@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 
 
 
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
 const db = mysql.createPool({
     host: process.env.MYSQLHOST,
@@ -32,23 +32,33 @@ const db = mysql.createPool({
     port: process.env.MYSQLPORT,
 
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 3,
     queueLimit: 0,
 
     enableKeepAlive: true,
     keepAliveInitialDelay: 0
 });
 
-db.getConnection((err, connection) => {
+async function testDB(){
 
-    if(err){
-        console.log("MYSQL ERROR:", err);
-    } else {
+    try{
+
+        const connection = await db.getConnection();
+
         console.log("✅ MySQL Connected");
+
         connection.release();
+
+    }catch(err){
+
+        console.log("MYSQL CONNECTION ERROR:");
+        console.log(err);
+
     }
 
-});
+}
+
+testDB();
 
 setInterval(() => {
 
