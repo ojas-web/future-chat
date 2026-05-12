@@ -58,6 +58,11 @@ setInterval(() => {
             console.log('Keep Alive Error:', err);
         }
 
+         if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
+
     });
 
 }, 30000);
@@ -74,6 +79,11 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(255) UNIQUE,
     password VARCHAR(255)
 )
+
+ if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 `);
 
 db.query(`
@@ -84,6 +94,11 @@ CREATE TABLE IF NOT EXISTS messages (
     message TEXT,
     time VARCHAR(255)
 )
+
+ if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 `);
 
 app.use(express.static('public'));
@@ -320,6 +335,10 @@ if(err){
     return res.send('Database error');
 }
 
+     if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 res.redirect('/');
 
 });
@@ -344,6 +363,11 @@ if(err){
     console.log(err);
     return res.send("DB Error");
 }
+
+     if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 
 if(results.length === 0){
     return res.send(`
@@ -1169,7 +1193,10 @@ socket.on('receiveMessage', (data) => {
 </html>
 
 `);
-
+ if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 }
 
 );
@@ -1213,7 +1240,10 @@ if(err){
 }
 
 res.redirect('/chat');
-
+ if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 });
 
 });
@@ -1229,7 +1259,10 @@ const user = req.session.user;
 const { id } = req.body;
 
 db.query(
-
+ if(err){
+        console.log("MYSQL QUERY ERROR:", err);
+        return;
+    }
 'DELETE FROM messages WHERE id=? AND sender=?',
 
 [id,user],
