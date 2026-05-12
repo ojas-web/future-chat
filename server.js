@@ -30,9 +30,13 @@ const db = mysql.createPool({
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
     port: process.env.MYSQLPORT,
+
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0
 });
 
 db.getConnection((err, connection) => {
@@ -40,11 +44,23 @@ db.getConnection((err, connection) => {
     if(err){
         console.log("MYSQL ERROR:", err);
     } else {
-        console.log("✅ MySQL Pool Connected");
+        console.log("✅ MySQL Connected");
         connection.release();
     }
 
 });
+
+setInterval(() => {
+
+    db.query('SELECT 1', (err) => {
+
+        if(err){
+            console.log('Keep Alive Error:', err);
+        }
+
+    });
+
+}, 30000);
 
 
 db.on('error', (err) => {
@@ -1261,4 +1277,12 @@ console.log(
 '🚀 Server running on http://localhost:3000'
 );
 
+});
+
+process.on('uncaughtException', (err) => {
+    console.log('UNCAUGHT EXCEPTION:', err);
+});
+
+process.on('unhandledRejection', (err) => {
+    console.log('UNHANDLED REJECTION:', err);
 });
