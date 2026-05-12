@@ -47,6 +47,11 @@ db.getConnection((err, connection) => {
 });
 
 
+db.on('error', (err) => {
+    console.log('MySQL Pool Error:', err);
+});
+
+
 db.query(`
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -262,7 +267,7 @@ Register
 </div>
 <script>
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/public/service-worker.js');
+    navigator.serviceWorker.register('/service-worker.js');
 }
 </script>
 </body>
@@ -569,7 +574,14 @@ db.query(
 
 db.query(
 
-'SELECT * FROM messages ORDER BY id ASC',
+`
+SELECT * FROM messages
+WHERE sender = ?
+OR receiver = ?
+ORDER BY id ASC
+`,
+
+[user, user],
 
 (err,messages)=>{
 
@@ -1123,7 +1135,11 @@ typing=false;
 
 <script>
 
-const socket = io();
+const socket = io({
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000
+});
 
 socket.on('receiveMessage', (data) => {
 
@@ -1246,35 +1262,3 @@ console.log(
 );
 
 });
-
-/*
-
-======================================
-
-INSTALL
-
-======================================
-
-npm init -y
-
-npm install express sqlite3 body-parser express-session bcrypt connect-sqlite3
-
-======================================
-
-RUN
-
-======================================
-
-node server.js
-
-======================================
-
-OPEN
-
-======================================
-
-http://localhost:3000
-
-======================================
-
-*/
