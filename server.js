@@ -60,27 +60,22 @@ async function testDB(){
 
 testDB();
 
-setInterval(() => {
+setInterval(async () => {
 
-    db.query('SELECT 1', (err) => {
+    try {
 
-        if(err){
-            console.log('Keep Alive Error:', err);
-        }
+        await db.query('SELECT 1');
 
-         if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
+    } catch(err) {
+
+        console.log('Keep Alive Error:', err);
+
     }
-
-    });
 
 }, 30000);
 
 
-db.on('error', (err) => {
-    console.log('MySQL Pool Error:', err);
-});
+
 
 
 db.query(`
@@ -1269,10 +1264,7 @@ const user = req.session.user;
 const { id } = req.body;
 
 db.query(
- if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+
 'DELETE FROM messages WHERE id=? AND sender=?',
 
 [id,user],
