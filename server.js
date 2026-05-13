@@ -336,28 +336,25 @@ const { username, password } = req.body;
 
 const hashed = await bcrypt.hash(password, 10);
 
-db.query(
-'INSERT INTO users(username,password) VALUES(?,?)',
-[username, hashed],
+try {
 
-(err, result) => {
+    await db.query(
+        'INSERT INTO users(username,password) VALUES($1,$2)',
+        [username, hashed]
+    );
 
-if(err){
+    res.redirect('/');
+
+} catch(err){
 
     console.log(err);
 
-    if(err.code === 'ER_DUP_ENTRY'){
+    if(err.code === '23505'){
         return res.send('Username already exists');
     }
 
     return res.send('Database error');
 }
-
-
-    
-res.redirect('/');
-
-});
 
 });
 
@@ -365,263 +362,27 @@ res.redirect('/');
 // LOGIN
 // ======================================
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
 
 const { username, password } = req.body;
 
-db.query(
-'SELECT * FROM users WHERE username=?',
-[username],
+try {
 
-async (err, results) => {
-
-if(err){
-    console.log(err);
-    return res.send("DB Error");
-}
-
-  
-
-if(results.length === 0){
-    return res.send(`
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Not Found</title>
-<style>
-    /* Reset & Base Styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        text-align: center;
-        overflow: hidden;
-    }
-
-    /* Container */
-    .container {
-        max-width: 500px;
-        padding: 20px;
-        animation: fadeIn 1s ease-in-out;
-    }
-
-    /* Animated Icon */
-    .icon {
-        font-size: 80px;
-        margin-bottom: 20px;
-        animation: bounce 1.5s infinite;
-    }
-
-    /* Headline */
-    h1 {
-        font-size: 2.2rem;
-        margin-bottom: 10px;
-    }
-
-    /* Message */
-    p {
-        font-size: 1.1rem;
-        margin-bottom: 20px;
-        opacity: 0.9;
-    }
-
-    /* Button */
-    .btn {
-        display: inline-block;
-        padding: 12px 25px;
-        background: #ff4b5c;
-        color: #fff;
-        border-radius: 25px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: background 0.3s ease;
-    }
-    .btn:hover {
-        background: #ff1e38;
-    }
-
-    /* Animations */
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-</head>
-<body>
-
-<div class="container">
-    <div class="icon">🚫</div>
-    <h1>User Not Found</h1>
-    <p>Sorry, the user you are looking for does not exist or may have been removed.</p>
-    <a href="https://future-chat-production.up.railway.app/chat" class="btn" id="goHome">Go to Homepage</a>
-</div>
-
-<script>
-    // Optional: Add a small delay before redirect if needed
-    document.getElementById('goHome').addEventListener('click', function(e) {
-        e.preventDefault();
-        this.textContent = "Redirecting...";
-        setTimeout(() => {
-            window.location.href = "https://future-chat-production.up.railway.app/chat";
-        }, 800);
-    });
-</script>
-
-</body>
-</html>
-
-
-
-`);
-}
-
-const user = results[0];
-
-const match = await bcrypt.compare(
-    password,
-    user.password
+const results = await db.query(
+    'SELECT * FROM users WHERE username=$1',
+    [username]
 );
-
-if(match){
-
-    req.session.user = username;
-    res.redirect('/chat');
-
-}else{
-
-    res.send(`
-             <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wrong Password</title>
-<style>
-    /* Reset default styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #ff4e50, #f9d423);
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .container {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        text-align: center;
-        max-width: 350px;
-        width: 100%;
-        animation: fadeIn 0.6s ease-in-out;
-    }
-
-    .icon {
-        font-size: 60px;
-        color: #ff4e50;
-        animation: shake 0.4s ease-in-out;
-    }
-
-    h1 {
-        margin-top: 1rem;
-        font-size: 1.8rem;
-        color: #333;
-    }
-
-    p {
-        margin: 0.8rem 0 1.5rem;
-        color: #666;
-    }
-
-    button {
-        background: #ff4e50;
-        color: white;
-        border: none;
-        padding: 0.7rem 1.5rem;
-        font-size: 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-
-    button:hover {
-        background: #e13c3e;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20%, 60% { transform: translateX(-8px); }
-        40%, 80% { transform: translateX(8px); }
-    }
-</style>
-</head>
-<body>
-
-<div class="container">
-    <div class="icon">❌</div>
-    <h1>Wrong Password</h1>
-    <p>Please check your password and try again.</p>
-    <button onclick="retryLogin()">Try Again</button>
-</div>
-
-<script>
-    function retryLogin() {
-        // Redirect to login page (change URL as needed)
-        window.location.href = "https://future-chat-production.up.railway.app/chat";
-    }
-</script>
-
-</body>
-</html>
-`);
-
-}
-
-});
-
-});
 
 // ======================================
 // CHAT PAGE
 // ======================================
 
-app.get('/chat',isLoggedIn,(req,res)=>{
+app.get('/chat', isLoggedIn, async (req, res) => {
 
 const user = req.session.user;
 
 db.query(
-'SELECT username FROM users WHERE username != ?',
+'SELECT username FROM users WHERE username != $1',
 [user],
 (err,users)=>{
 
@@ -629,8 +390,8 @@ db.query(
 
 `
 SELECT * FROM messages
-WHERE sender = ?
-OR receiver = ?
+WHERE sender = $1
+OR receiver = $2
 ORDER BY id ASC
 `,
 
@@ -943,6 +704,7 @@ document.getElementById(
 'chat-' + username
 );
 
+
 if(panel.style.display==='none'){
 
 panel.style.display='block';
@@ -950,6 +712,7 @@ panel.style.display='block';
 openChats[username]=true;
 
 }else{
+
 
 panel.style.display='none';
 
@@ -1239,7 +1002,7 @@ io.emit('receiveMessage', {
 });
 
 db.query(
-'INSERT INTO messages(sender,receiver,message,time) VALUES(?,?,?,?)',
+'INSERT INTO messages(sender,receiver,message,time) VALUES($1,$2,$3,$4)',
 [sender, receiver, message, time],
 
 (err) => {
@@ -1250,10 +1013,7 @@ if(err){
 }
 
 res.redirect('/chat');
- if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+ 
 });
 
 });
@@ -1262,7 +1022,7 @@ res.redirect('/chat');
 // DELETE MESSAGE
 // ======================================
 
-app.post('/delete-message',isLoggedIn,(req,res)=>{
+app.post('/delete-message', isLoggedIn, async (req, res) => {
 
 const user = req.session.user;
 
@@ -1270,7 +1030,7 @@ const { id } = req.body;
 
 db.query(
 
-'DELETE FROM messages WHERE id=? AND sender=?',
+'DELETE FROM messages WHERE id=$1 AND sender=$2',
 
 [id,user],
 
