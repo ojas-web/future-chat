@@ -18,7 +18,7 @@
     "express-session": "^1.18.0",
     "mysql2": "^3.11.0",
     "socket.io": "^4.8.1",
-    "pg": "^18"
+    "pg": "^8.11.5"
   },
   "devDependencies": {
     "electron": "^36.0.0"
