@@ -22,22 +22,40 @@ const PORT = process.env.PORT || 3000;
 
 
 
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 
-const db = mysql.createPool({
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-    port: process.env.MYSQLPORT,
-
-    waitForConnections: true,
-    connectionLimit: 3,
-    queueLimit: 0,
-
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
+
+db.connect()
+.then(() => {
+    console.log("✅ PostgreSQL Connected");
+})
+.catch((err) => {
+    console.log("DATABASE ERROR:", err);
+});
+
+db.query(`
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE,
+    password VARCHAR(255)
+)
+`);
+
+db.query(`
+CREATE TABLE IF NOT EXISTS messages (
+    id SERIAL PRIMARY KEY,
+    sender VARCHAR(255),
+    receiver VARCHAR(255),
+    message TEXT,
+    time VARCHAR(255)
+)
+`);
 
 async function testDB(){
 
@@ -85,10 +103,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255)
 )
 
- if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+ 
 `);
 
 db.query(`
@@ -100,10 +115,8 @@ CREATE TABLE IF NOT EXISTS messages (
     time VARCHAR(255)
 )
 
- if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+
+
 `);
 
 app.use(express.static('public'));
@@ -340,10 +353,8 @@ if(err){
     return res.send('Database error');
 }
 
-     if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+
+    
 res.redirect('/');
 
 });
@@ -369,10 +380,7 @@ if(err){
     return res.send("DB Error");
 }
 
-     if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+  
 
 if(results.length === 0){
     return res.send(`
@@ -1198,10 +1206,7 @@ socket.on('receiveMessage', (data) => {
 </html>
 
 `);
- if(err){
-        console.log("MYSQL QUERY ERROR:", err);
-        return;
-    }
+
 }
 
 );
