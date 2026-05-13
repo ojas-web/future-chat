@@ -57,24 +57,24 @@ CREATE TABLE IF NOT EXISTS messages (
 )
 `);
 
-async function testDB(){
+async function testDB() {
 
-    try{
+    try {
 
-        const connection = await db.getConnection();
+        await db.query('SELECT NOW()');
 
-        console.log("✅ MySQL Connected");
+        console.log("✅ PostgreSQL Connected");
 
-        connection.release();
+    } catch (err) {
 
-    }catch(err){
-
-        console.log("MYSQL CONNECTION ERROR:");
+        console.log("POSTGRES CONNECTION ERROR:");
         console.log(err);
 
     }
 
 }
+
+testDB();
 
 testDB();
 
