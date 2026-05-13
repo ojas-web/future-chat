@@ -98,7 +98,7 @@ setInterval(async () => {
 
 db.query(`
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+   id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE,
     password VARCHAR(255)
 )
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 db.query(`
 CREATE TABLE IF NOT EXISTS messages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
     sender VARCHAR(255),
     receiver VARCHAR(255),
     message TEXT,
