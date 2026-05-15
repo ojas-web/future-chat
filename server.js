@@ -373,6 +373,15 @@ const results = await db.query(
     [username]
 );
 
+
+    } catch(err){
+
+console.log(err);
+res.send(err);
+
+}
+
+});
 // ======================================
 // CHAT PAGE
 // ======================================
