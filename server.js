@@ -432,7 +432,7 @@ ORDER BY id ASC
 `,
 [user, user]
 
-
+);
 
 let usersHtml='';
 
