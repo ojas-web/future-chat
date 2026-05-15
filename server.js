@@ -373,11 +373,36 @@ const results = await db.query(
     [username]
 );
 
+if(results.rows.length === 0){
 
-    } catch(err){
+    return res.send('User not found');
+
+}
+
+const user = results.rows[0];
+
+const match = await bcrypt.compare(
+    password,
+    user.password
+);
+
+if(match){
+
+    req.session.user = username;
+
+    res.redirect('/chat');
+
+}else{
+
+    res.send('Wrong password');
+
+}
+
+} catch(err){
 
 console.log(err);
-res.send(err);
+
+res.send("DB Error");
 
 }
 
@@ -390,23 +415,23 @@ app.get('/chat', isLoggedIn, async (req, res) => {
 
 const user = req.session.user;
 
-db.query(
+const usersResult = await db.query(
 'SELECT username FROM users WHERE username != $1',
-[user],
-(err,users)=>{
+[user]
 
-db.query(
 
+const users = usersResult.rows;
+
+const messagesResult = await db.query(
 `
 SELECT * FROM messages
 WHERE sender = $1
 OR receiver = $2
 ORDER BY id ASC
 `,
+[user, user]
 
-[user, user],
 
-(err,messages)=>{
 
 let usersHtml='';
 
@@ -979,11 +1004,11 @@ socket.on('receiveMessage', (data) => {
 
 `);
 
-}
+
 
 );
 
-}
+
 
 );
 
