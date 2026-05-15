@@ -418,6 +418,7 @@ const user = req.session.user;
 const usersResult = await db.query(
 'SELECT username FROM users WHERE username != $1',
 [user]
+    );
 
 
 const users = usersResult.rows;
